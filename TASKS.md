@@ -4,6 +4,44 @@ Each PR is self-contained and builds on the previous. Merge in order.
 
 ---
 
+## Design Phase — Claude Design + Handoff (before PR 2)
+
+**Not a PR — a prerequisite step before any feature work begins.**  
+**Goal:** Generate the full app design in Claude Design and hand it off to Claude Code so every PR implements against real designs, not guesswork.
+
+### Step 1 — Generate designs in Claude Design
+Cover these screens/states:
+- [ ] Upload screen (empty state, drag-active state, images loaded)
+- [ ] Main editor layout (sidebar panels, image preview area)
+- [ ] Resize panel
+- [ ] Crop tool overlay
+- [ ] Filters & adjustments panel
+- [ ] Watermark panel
+- [ ] Before/After preview (side-by-side and slider modes)
+- [ ] Download/export panel
+- [ ] Error and warning states (unsupported file, limit exceeded)
+- [ ] Dark mode variants for all screens above
+
+### Step 2 — Hand off to Claude Code
+Use the **Handoff to Claude Code** feature in Claude Design. This gives Claude Code:
+- Component-level design specs (spacing, sizing, colors)
+- Design tokens (colors, radii, shadows, typography scale)
+- Asset exports (icons, illustrations if any)
+
+### Step 3 — Apply design tokens to scaffold (PR 1.5)
+**Branch:** `feat/design-tokens`  
+**Depends on:** PR 1 + Design handoff
+
+- [ ] Replace placeholder CSS variables in `src/index.css` with tokens from the handoff (light + dark palette)
+- [ ] Update typography scale (font sizes, weights, line heights)
+- [ ] Set border radii, shadow levels, spacing scale
+- [ ] Verify Navbar and Layout shell visually match the design
+- [ ] Confirm dark/light toggle renders both themes correctly
+
+> All subsequent PRs (2–11) implement features **against the handed-off design specs**.
+
+---
+
 ## PR 1 — Project Scaffold
 **Branch:** `feat/scaffold`  
 **PRD Refs:** Tech Stack (§4)  
@@ -23,7 +61,7 @@ Each PR is self-contained and builds on the previous. Merge in order.
 ## PR 2 — Upload & Image Queue
 **Branch:** `feat/upload`  
 **PRD Refs:** U1, U2, U3, U4, H3  
-**Depends on:** PR 1
+**Depends on:** PR 1 + Design handoff (Design Phase Step 3)
 
 - [ ] Build drag & drop upload zone component
 - [ ] Wire native file picker (click to open, multi-select)
@@ -161,18 +199,23 @@ Each PR is self-contained and builds on the previous. Merge in order.
 
 ## Summary
 
-| PR  | Branch                | Features            | Depends On |
-|-----|-----------------------|---------------------|------------|
-| 1   | feat/scaffold         | Project setup       | —          |
-| 2   | feat/upload           | U1–U4, H3           | PR 1       |
-| 3   | feat/resize           | R1–R6               | PR 2       |
-| 4   | feat/quality-format   | Q1–Q4               | PR 3       |
-| 5   | feat/crop             | V2                  | PR 3       |
-| 6   | feat/rotate-flip      | V3, V4              | PR 3       |
-| 7   | feat/preview          | V1                  | PR 3       |
-| 8   | feat/filters          | F1–F4               | PR 3       |
-| 9   | feat/watermark        | W1–W3               | PR 3       |
-| 10  | feat/download         | O1–O5               | PR 4       |
-| 11  | feat/undo-redo        | H1, H2, H4, H5      | PR 10      |
+| Step      | Branch                | Description                        | Depends On              |
+|-----------|-----------------------|------------------------------------|-------------------------|
+| Design    | —                     | Claude Design + handoff            | PR 1 merged             |
+| Tokens    | feat/design-tokens    | Apply design tokens to scaffold    | Design handoff          |
+| PR 1      | feat/scaffold         | Project setup                      | —                       |
+| PR 2      | feat/upload           | U1–U4, H3                          | PR 1 + design tokens    |
+| PR 3      | feat/resize           | R1–R6                              | PR 2                    |
+| PR 4      | feat/quality-format   | Q1–Q4                              | PR 3                    |
+| PR 5      | feat/crop             | V2                                 | PR 3                    |
+| PR 6      | feat/rotate-flip      | V3, V4                             | PR 3                    |
+| PR 7      | feat/preview          | V1                                 | PR 3                    |
+| PR 8      | feat/filters          | F1–F4                              | PR 3                    |
+| PR 9      | feat/watermark        | W1–W3                              | PR 3                    |
+| PR 10     | feat/download         | O1–O5                              | PR 4                    |
+| PR 11     | feat/undo-redo        | H1, H2, H4, H5                     | PR 10                   |
 
-PRs 5–9 can be worked on in parallel after PR 3 merges.
+**Sequencing notes:**
+- Design Phase runs after PR 1 merges, before PR 2 starts
+- PRs 5–9 can be worked on in parallel after PR 3 merges
+- The design token step (PR 1.5) is a bridge between design handoff and feature PRs
