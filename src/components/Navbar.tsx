@@ -29,7 +29,7 @@ export function Navbar({ theme, onToggleTheme }: NavbarProps) {
       <button
         onClick={onToggleTheme}
         aria-label="Toggle theme"
-        className="p-2 rounded-lg hover:bg-[var(--color-hover)] transition-colors text-[var(--color-text-muted)]"
+        className="p-2 rounded-lg hover:bg-[var(--bg3)] transition-colors text-[var(--text2)]"
       >
         {theme === 'light' ? (
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

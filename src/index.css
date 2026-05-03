@@ -1,25 +1,46 @@
 @import "tailwindcss";
 
+/* ─── Dark mode (default / :root) ──────────────────────────────────────────── */
 :root {
-  --color-bg: #f8f9fa;
-  --color-surface: #ffffff;
-  --color-border: #e2e8f0;
-  --color-text: #1a202c;
-  --color-text-muted: #718096;
-  --color-accent: #6366f1;
-  --color-accent-hover: #4f46e5;
-  --color-hover: #f1f5f9;
+  --bg: oklch(13% 0.01 250);
+  --bg2: oklch(17% 0.01 250);
+  --bg3: oklch(21% 0.012 250);
+  --border: oklch(28% 0.012 250);
+  --border2: oklch(34% 0.01 250);
+  --text: oklch(88% 0.008 250);
+  --text2: oklch(60% 0.008 250);
+  --text3: oklch(42% 0.008 250);
+  --accent: oklch(65% 0.18 255);
+  --accent-dim: oklch(65% 0.18 255 / 0.15);
+  --accent-hover: oklch(70% 0.18 255);
+  --danger: oklch(65% 0.18 20);
+  --success: oklch(68% 0.16 145);
+
+  /* Long-name aliases */
+  --color-bg: var(--bg);
+  --color-surface: var(--bg2);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text2);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
 }
 
-[data-theme="dark"] {
-  --color-bg: #0f1117;
-  --color-surface: #1a1d27;
-  --color-border: #2d3248;
-  --color-text: #e2e8f0;
-  --color-text-muted: #718096;
-  --color-accent: #818cf8;
-  --color-accent-hover: #6366f1;
-  --color-hover: #252840;
+/* ─── Light mode ────────────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg: oklch(96% 0.005 250);
+  --bg2: oklch(100% 0 0);
+  --bg3: oklch(93% 0.006 250);
+  --border: oklch(82% 0.008 250);
+  --border2: oklch(74% 0.008 250);
+  --text: oklch(18% 0.01 250);
+  --text2: oklch(42% 0.01 250);
+  --text3: oklch(60% 0.008 250);
+  --accent: oklch(52% 0.2 255);
+  --accent-dim: oklch(52% 0.2 255 / 0.12);
+  --accent-hover: oklch(48% 0.2 255);
+  --danger: oklch(65% 0.18 20);
+  --success: oklch(68% 0.16 145);
 }
 
 * {
