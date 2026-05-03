@@ -11,7 +11,7 @@ function SidebarPlaceholder() {
       {['Resize', 'Crop', 'Rotate & Flip', 'Filters', 'Watermark', 'Download'].map((item) => (
         <button
           key={item}
-          className="w-full text-left px-3 py-2 rounded-lg text-sm text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
+          className="w-full text-left px-3 py-2 rounded-lg text-sm text-[var(--color-text)] hover:bg-[var(--bg3)] transition-colors"
         >
           {item}
         </button>
