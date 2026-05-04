@@ -3,8 +3,7 @@
 Each section is a self-contained prompt. Copy the full block into Claude Code to implement that PR.
 Work in order. Each PR depends on the previous one being merged.
 
-The design handoff zip (`PixResize.zip`) is in the project root. Unzip it and keep it open alongside
-each prompt — the prompts reference specific files and line ranges inside it.
+The design handoff zip is at `design/handoff/PixResize.zip`. See `CLAUDE.md` for how to use it correctly — the handoff rules are loaded automatically by Claude Code from there.
 
 ---
 
