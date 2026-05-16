@@ -182,8 +182,8 @@ Port `UploadZone` (lines 59–97) and `ImageList` + `ImageThumb` (lines 100–13
   Wire up `addImages(files: File[])` which:
     1. Reads each file as a data URL (FileReader)
     2. Loads it into an `<img>` to get natural width/height
-    3. Enforces the 50-image cap — if adding the new batch would exceed 50, show a browser alert
-       ("Maximum 50 images. Only the first N were added.") and trim the batch
+    3. Enforces the 20-image cap — if adding the new batch would exceed 20, show a browser alert
+       ("Maximum 20 images. Only the first N were added.") and trim the batch
     4. Creates an `ImageItem` with a random `id` (crypto.randomUUID()), the file name, data URL,
        size (file.size), dimensions, `processed: false`, and a fresh copy of `DEFAULT_SETTINGS`
   Render `UploadZone` when `images.length === 0`.
@@ -196,7 +196,7 @@ Port `UploadZone` (lines 59–97) and `ImageList` + `ImageThumb` (lines 100–13
 - Drag and drop a JPG/PNG → thumbnail appears in the list, clicking it sets it as selected
   (highlighted border)
 - Click the + button in the list header → file picker opens, multi-select works
-- Drop 51 images → alert fires, only 50 load
+- Drop 21 images → alert fires, only 20 load
 - Removing an image from the list removes it from state; if it was selected, clear selection
 - No TypeScript errors (`pnpm tsc --noEmit`)
 ```

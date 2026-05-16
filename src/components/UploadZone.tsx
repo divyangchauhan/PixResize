@@ -82,7 +82,7 @@ export function UploadZone({ onFiles }: UploadZoneProps) {
         <div className="upload-title">
           {dragging ? 'Drop images here' : 'Drop images or click to upload'}
         </div>
-        <div className="upload-sub">Supports JPG, PNG, WebP, AVIF, GIF · Up to 50 images</div>
+        <div className="upload-sub">Supports JPG, PNG, WebP, AVIF, GIF · Up to 20 images</div>
       </div>
     </>
   )
