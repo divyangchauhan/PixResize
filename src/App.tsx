@@ -7,7 +7,7 @@ import { ImageList } from '@/components/ImageList'
 import type { ImageItem } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
-const MAX_IMAGES = 50
+const MAX_IMAGES = 20
 
 function SidebarPlaceholder() {
   return (
@@ -62,7 +62,7 @@ export default function App() {
     const available = MAX_IMAGES - images.length
     let batch = files
     if (batch.length > available) {
-      alert(`Maximum 50 images. Only the first ${available} were added.`)
+      alert(`Maximum ${MAX_IMAGES} images. Only the first ${available} were added.`)
       batch = batch.slice(0, available)
     }
     if (!batch.length) return
