@@ -4,7 +4,10 @@ import { Navbar } from '@/components/Navbar'
 import { Layout } from '@/components/Layout'
 import { UploadZone } from '@/components/UploadZone'
 import { ImageList } from '@/components/ImageList'
-import type { ImageItem } from '@/types'
+import { ControlStyles } from '@/components/controls/primitives'
+import { ResizeSection } from '@/components/controls/ResizeSection'
+import { computeOutputDimensions } from '@/utils/resize'
+import type { ImageItem, Settings } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
 const MAX_IMAGES = 20
@@ -58,6 +61,8 @@ export default function App() {
   const [images, setImages] = useState<ImageItem[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
+  const selectedImage = images.find((img) => img.id === selectedId) ?? null
+
   const addImages = async (files: File[]) => {
     const available = MAX_IMAGES - images.length
     let batch = files
@@ -67,14 +72,29 @@ export default function App() {
     }
     if (!batch.length) return
     const newItems = await Promise.all(batch.map(loadImageFile))
-    setImages(prev => [...prev, ...newItems])
+    setImages((prev) => [...prev, ...newItems])
     if (!selectedId) setSelectedId(newItems[0].id)
   }
 
   const removeImage = (id: string) => {
-    setImages(prev => prev.filter(img => img.id !== id))
+    setImages((prev) => prev.filter((img) => img.id !== id))
     if (selectedId === id) setSelectedId(null)
   }
+
+  const updateSettings = (next: Settings) => {
+    if (!selectedImage) return
+    setImages((prev) =>
+      prev.map((img) => (img.id === selectedImage.id ? { ...img, settings: next } : img)),
+    )
+  }
+
+  const output = selectedImage
+    ? computeOutputDimensions(
+        selectedImage.settings.resize,
+        selectedImage.width,
+        selectedImage.height,
+      )
+    : null
 
   const mainContent =
     images.length === 0 ? (
@@ -90,8 +110,39 @@ export default function App() {
           onRemove={removeImage}
           onAdd={addImages}
         />
-        <div className="flex-1 flex items-center justify-center text-[var(--text3)] text-sm">
-          Editor coming in PR 3
+        <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex items-center justify-center text-[var(--text3)] text-sm">
+            Preview coming in PR 7
+          </div>
+          {selectedImage && (
+            <aside
+              className="w-[260px] shrink-0 overflow-y-auto"
+              style={{
+                borderLeft: '1px solid var(--border)',
+                background: 'var(--bg2)',
+              }}
+            >
+              <ControlStyles />
+              <ResizeSection
+                settings={selectedImage.settings}
+                onChange={updateSettings}
+                imgW={selectedImage.width}
+                imgH={selectedImage.height}
+              />
+              {output && (
+                <div
+                  style={{
+                    padding: '10px 14px',
+                    fontFamily: "'DM Mono', monospace",
+                    fontSize: '11px',
+                    color: 'var(--text2)',
+                  }}
+                >
+                  Output: {output.w} × {output.h} px
+                </div>
+              )}
+            </aside>
+          )}
         </div>
       </div>
     )
