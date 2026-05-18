@@ -12,24 +12,6 @@ import { DEFAULT_SETTINGS } from '@/types'
 
 const MAX_IMAGES = 20
 
-function SidebarPlaceholder() {
-  return (
-    <div className="space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-text-muted)]">
-        Tools
-      </p>
-      {['Resize', 'Crop', 'Rotate & Flip', 'Filters', 'Watermark', 'Download'].map((item) => (
-        <button
-          key={item}
-          className="w-full text-left px-3 py-2 rounded-lg text-sm text-[var(--color-text)] hover:bg-[var(--bg3)] transition-colors"
-        >
-          {item}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 function loadImageFile(file: File): Promise<ImageItem> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
@@ -96,6 +78,34 @@ export default function App() {
       )
     : null
 
+  const sidebarContent = selectedImage ? (
+    <>
+      <ControlStyles />
+      <ResizeSection
+        settings={selectedImage.settings}
+        onChange={updateSettings}
+        imgW={selectedImage.width}
+        imgH={selectedImage.height}
+      />
+      {output && (
+        <div
+          style={{
+            padding: '10px 14px',
+            fontFamily: "'DM Mono', monospace",
+            fontSize: '11px',
+            color: 'var(--text2)',
+          }}
+        >
+          Output: {output.w} × {output.h} px
+        </div>
+      )}
+    </>
+  ) : (
+    <p className="p-4 text-sm text-[var(--text3)]">
+      Select an image to edit.
+    </p>
+  )
+
   const mainContent =
     images.length === 0 ? (
       <div className="flex items-center justify-center h-full">
@@ -110,39 +120,8 @@ export default function App() {
           onRemove={removeImage}
           onAdd={addImages}
         />
-        <div className="flex-1 flex overflow-hidden">
-          <div className="flex-1 flex items-center justify-center text-[var(--text3)] text-sm">
-            Preview coming in PR 7
-          </div>
-          {selectedImage && (
-            <aside
-              className="w-[260px] shrink-0 overflow-y-auto"
-              style={{
-                borderLeft: '1px solid var(--border)',
-                background: 'var(--bg2)',
-              }}
-            >
-              <ControlStyles />
-              <ResizeSection
-                settings={selectedImage.settings}
-                onChange={updateSettings}
-                imgW={selectedImage.width}
-                imgH={selectedImage.height}
-              />
-              {output && (
-                <div
-                  style={{
-                    padding: '10px 14px',
-                    fontFamily: "'DM Mono', monospace",
-                    fontSize: '11px',
-                    color: 'var(--text2)',
-                  }}
-                >
-                  Output: {output.w} × {output.h} px
-                </div>
-              )}
-            </aside>
-          )}
+        <div className="flex-1 flex items-center justify-center text-[var(--text3)] text-sm">
+          Preview coming in PR 7
         </div>
       </div>
     )
@@ -150,7 +129,7 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen bg-[var(--color-bg)] text-[var(--color-text)]">
       <Navbar theme={theme} onToggleTheme={toggle} />
-      <Layout sidebar={<SidebarPlaceholder />} main={mainContent} />
+      <Layout sidebar={sidebarContent} main={mainContent} />
     </div>
   )
 }
