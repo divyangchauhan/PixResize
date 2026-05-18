@@ -4,9 +4,12 @@ import { Navbar } from '@/components/Navbar'
 import { Layout } from '@/components/Layout'
 import { UploadZone } from '@/components/UploadZone'
 import { ImageList } from '@/components/ImageList'
+import { CropOverlay } from '@/components/CropOverlay'
+import type { CropRect } from '@/components/CropOverlay'
 import { ControlStyles } from '@/components/controls/primitives'
 import { ResizeSection } from '@/components/controls/ResizeSection'
 import { OutputSection } from '@/components/controls/OutputSection'
+import { TransformSection } from '@/components/controls/TransformSection'
 import { useSizeEstimate } from '@/hooks/useSizeEstimate'
 import type { ImageItem, Settings } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
@@ -52,6 +55,7 @@ export default function App() {
   const { theme, toggle } = useTheme()
   const [images, setImages] = useState<ImageItem[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [cropActive, setCropActive] = useState(false)
 
   const selectedImage = images.find((img) => img.id === selectedId) ?? null
   const sizeEstimate = useSizeEstimate(
@@ -77,6 +81,25 @@ export default function App() {
     if (selectedId === id) setSelectedId(null)
   }
 
+  const onToggleCrop = () => {
+    const next = !cropActive
+    setCropActive(next)
+    if (!next && selectedImage) {
+      updateSettings({
+        ...selectedImage.settings,
+        transform: { ...selectedImage.settings.transform, crop: null },
+      })
+    }
+  }
+
+  const onCropChange = (c: CropRect | null) => {
+    if (!selectedImage) return
+    updateSettings({
+      ...selectedImage.settings,
+      transform: { ...selectedImage.settings.transform, crop: c },
+    })
+  }
+
   const updateSettings = async (next: Settings) => {
     if (!selectedImage) return
     let resolved = next
@@ -100,6 +123,12 @@ export default function App() {
         onChange={updateSettings}
         imgW={selectedImage.width}
         imgH={selectedImage.height}
+      />
+      <TransformSection
+        settings={selectedImage.settings}
+        onChange={updateSettings}
+        cropActive={cropActive}
+        onToggleCrop={onToggleCrop}
       />
       <OutputSection
         settings={selectedImage.settings}
@@ -127,8 +156,16 @@ export default function App() {
           onRemove={removeImage}
           onAdd={addImages}
         />
-        <div className="flex-1 flex items-center justify-center text-[var(--text3)] text-sm">
+        <div className="flex-1 relative flex items-center justify-center text-[var(--text3)] text-sm">
           Preview coming in PR 7
+          {cropActive && selectedImage && (
+            <CropOverlay
+              imgW={selectedImage.width}
+              imgH={selectedImage.height}
+              crop={selectedImage.settings.transform.crop}
+              onChange={onCropChange}
+            />
+          )}
         </div>
       </div>
     )

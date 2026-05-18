@@ -63,11 +63,13 @@ export async function processImage(
 
   const img = await loadImage(originalSrc);
 
-  const { w: outW, h: outH } = computeOutputDimensions(
-    resize,
-    img.naturalWidth,
-    img.naturalHeight,
-  );
+  // Crop is applied before resize: treat the cropped region as the effective source
+  const srcX = transform.crop ? transform.crop.x : 0;
+  const srcY = transform.crop ? transform.crop.y : 0;
+  const srcW = transform.crop ? transform.crop.w : img.naturalWidth;
+  const srcH = transform.crop ? transform.crop.h : img.naturalHeight;
+
+  const { w: outW, h: outH } = computeOutputDimensions(resize, srcW, srcH);
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
@@ -95,24 +97,24 @@ export async function processImage(
   let dx = -outW / 2, dy = -outH / 2, dw = outW, dh = outH;
 
   if (fitMode === 'cover') {
-    const scaleW = outW / img.naturalWidth;
-    const scaleH = outH / img.naturalHeight;
+    const scaleW = outW / srcW;
+    const scaleH = outH / srcH;
     const scale = Math.max(scaleW, scaleH);
-    dw = img.naturalWidth * scale;
-    dh = img.naturalHeight * scale;
+    dw = srcW * scale;
+    dh = srcH * scale;
     dx = -(dw / 2);
     dy = -(dh / 2);
   } else if (fitMode === 'contain') {
-    const scaleW = outW / img.naturalWidth;
-    const scaleH = outH / img.naturalHeight;
+    const scaleW = outW / srcW;
+    const scaleH = outH / srcH;
     const scale = Math.min(scaleW, scaleH);
-    dw = img.naturalWidth * scale;
-    dh = img.naturalHeight * scale;
+    dw = srcW * scale;
+    dh = srcH * scale;
     dx = -(dw / 2);
     dy = -(dh / 2);
   }
 
-  ctx.drawImage(img, 0, 0, img.naturalWidth, img.naturalHeight, dx, dy, dw, dh);
+  ctx.drawImage(img, srcX, srcY, srcW, srcH, dx, dy, dw, dh);
   ctx.restore();
 
   if (watermark.textEnabled && watermark.text) {
