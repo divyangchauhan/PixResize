@@ -1,4 +1,5 @@
 import type { Settings } from '@/types'
+import { computeOutputDimensions } from '@/utils/resize'
 
 export function formatBytes(bytes: number): string {
   if (bytes === 0) return '0 B';
@@ -62,19 +63,11 @@ export async function processImage(
 
   const img = await loadImage(originalSrc);
 
-  let outW = img.naturalWidth;
-  let outH = img.naturalHeight;
-
-  if (resize.enabled) {
-    if (resize.mode === 'pixels') {
-      outW = parseInt(String(resize.width)) || img.naturalWidth;
-      outH = parseInt(String(resize.height)) || img.naturalHeight;
-    } else if (resize.mode === 'percent') {
-      const pct = parseFloat(String(resize.percent)) / 100;
-      outW = Math.round(img.naturalWidth * pct);
-      outH = Math.round(img.naturalHeight * pct);
-    }
-  }
+  const { w: outW, h: outH } = computeOutputDimensions(
+    resize,
+    img.naturalWidth,
+    img.naturalHeight,
+  );
 
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d')!;
@@ -143,7 +136,9 @@ export async function processImage(
       const pos = getWatermarkPos(watermark.logoPosition, canvas.width, canvas.height);
       ctx.drawImage(logo, pos.x - lw / 2, pos.y - lh / 2, lw, lh);
       ctx.restore();
-    } catch (_e) {}
+    } catch {
+      /* logo failed to load — skip the logo watermark */
+    }
   }
 
   return canvas;
@@ -159,7 +154,7 @@ export async function estimateSize(
     const canvas = await processImage(originalSrc, settings);
     const blob = await canvasToBlob(canvas, format, quality);
     return blob ? blob.size : 0;
-  } catch (_e) {
+  } catch {
     return 0;
   }
 }
