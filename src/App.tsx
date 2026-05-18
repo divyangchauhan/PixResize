@@ -6,7 +6,8 @@ import { UploadZone } from '@/components/UploadZone'
 import { ImageList } from '@/components/ImageList'
 import { ControlStyles } from '@/components/controls/primitives'
 import { ResizeSection } from '@/components/controls/ResizeSection'
-import { computeOutputDimensions } from '@/utils/resize'
+import { OutputSection } from '@/components/controls/OutputSection'
+import { useSizeEstimate } from '@/hooks/useSizeEstimate'
 import type { ImageItem, Settings } from '@/types'
 import { DEFAULT_SETTINGS } from '@/types'
 
@@ -38,12 +39,25 @@ function loadImageFile(file: File): Promise<ImageItem> {
   })
 }
 
+function checkAvifSupport(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 1
+    canvas.height = 1
+    canvas.toBlob((blob) => resolve(!!blob && blob.size > 0), 'image/avif')
+  })
+}
+
 export default function App() {
   const { theme, toggle } = useTheme()
   const [images, setImages] = useState<ImageItem[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const selectedImage = images.find((img) => img.id === selectedId) ?? null
+  const sizeEstimate = useSizeEstimate(
+    selectedImage?.src ?? null,
+    selectedImage?.settings ?? null,
+  )
 
   const addImages = async (files: File[]) => {
     const available = MAX_IMAGES - images.length
@@ -63,20 +77,20 @@ export default function App() {
     if (selectedId === id) setSelectedId(null)
   }
 
-  const updateSettings = (next: Settings) => {
+  const updateSettings = async (next: Settings) => {
     if (!selectedImage) return
+    let resolved = next
+    if (next.output.format === 'avif' && selectedImage.settings.output.format !== 'avif') {
+      const supported = await checkAvifSupport()
+      if (!supported) {
+        console.warn('AVIF encode not supported in this browser; falling back to webp.')
+        resolved = { ...next, output: { ...next.output, format: 'webp' } }
+      }
+    }
     setImages((prev) =>
-      prev.map((img) => (img.id === selectedImage.id ? { ...img, settings: next } : img)),
+      prev.map((img) => (img.id === selectedImage.id ? { ...img, settings: resolved } : img)),
     )
   }
-
-  const output = selectedImage
-    ? computeOutputDimensions(
-        selectedImage.settings.resize,
-        selectedImage.width,
-        selectedImage.height,
-      )
-    : null
 
   const sidebarContent = selectedImage ? (
     <>
@@ -87,18 +101,11 @@ export default function App() {
         imgW={selectedImage.width}
         imgH={selectedImage.height}
       />
-      {output && (
-        <div
-          style={{
-            padding: '10px 14px',
-            fontFamily: "'DM Mono', monospace",
-            fontSize: '11px',
-            color: 'var(--text2)',
-          }}
-        >
-          Output: {output.w} × {output.h} px
-        </div>
-      )}
+      <OutputSection
+        settings={selectedImage.settings}
+        onChange={updateSettings}
+        sizeEstimate={sizeEstimate}
+      />
     </>
   ) : (
     <p className="p-4 text-sm text-[var(--text3)]">
