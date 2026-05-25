@@ -5,11 +5,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-pnpm dev          # start Vite dev server
-pnpm build        # tsc -b && vite build
-pnpm lint         # eslint
-pnpm format       # prettier --write .
-pnpm tsc --noEmit # type-check only (no test suite yet)
+pnpm dev              # start Vite dev server
+pnpm build            # tsc -b && vite build
+pnpm lint             # eslint
+pnpm format           # prettier --write .
+pnpm tsc --noEmit     # type-check only
+
+# Testing
+pnpm test             # run all unit tests once (Vitest)
+pnpm test:watch       # unit tests in watch mode
+pnpm test:coverage    # unit tests + coverage report
+pnpm test:e2e         # run Playwright E2E tests (starts dev server automatically)
+pnpm test:e2e:ui      # Playwright with interactive UI
+```
+
+## Test layout
+
+```
+src/
+  test/setup.ts                          # Vitest global setup (canvas stubs, jest-dom)
+  utils/resize.test.ts                   # computeOutputDimensions unit tests
+  utils/imageProcessing.test.ts          # formatBytes, clamp, getWatermarkPos, processImage
+  hooks/useSizeEstimate.test.ts          # hook behaviour
+  components/controls/
+    ResizeSection.test.tsx
+    AdjustmentsSection.test.tsx
+    OutputSection.test.tsx
+  components/ActionBar.test.tsx
+
+e2e/
+  upload.spec.ts    # file upload flows
+  editor.spec.ts    # resize/adjust/output/undo-redo/before-after
+  theme.spec.ts     # dark/light theme toggle
 ```
 
 ## Architecture

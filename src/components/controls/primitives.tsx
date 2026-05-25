@@ -11,11 +11,13 @@ interface SliderProps {
 }
 
 export function Slider({ label, value, min, max, step = 1, unit = '', onChange }: SliderProps) {
+  const id = `slider-${label.toLowerCase().replace(/\s+/g, '-')}`
   return (
     <div className="ctrl-row">
-      <label className="ctrl-label">{label}</label>
+      <label className="ctrl-label" htmlFor={id}>{label}</label>
       <div className="ctrl-slider-wrap">
         <input
+          id={id}
           type="range"
           min={min}
           max={max}
@@ -39,11 +41,14 @@ interface NumberInputProps {
   min?: number
   max?: number
   placeholder?: string | number
+  'aria-label'?: string
+  id?: string
 }
 
-export function NumberInput({ value, onChange, min, max, placeholder }: NumberInputProps) {
+export function NumberInput({ value, onChange, min, max, placeholder, 'aria-label': ariaLabel, id }: NumberInputProps) {
   return (
     <input
+      id={id}
       type="number"
       className="num-input"
       value={value}
@@ -51,6 +56,7 @@ export function NumberInput({ value, onChange, min, max, placeholder }: NumberIn
       max={max}
       placeholder={placeholder === undefined ? undefined : String(placeholder)}
       onChange={(e) => onChange(e.target.value)}
+      aria-label={ariaLabel}
     />
   )
 }
@@ -66,6 +72,9 @@ export function Toggle({ label, checked, onChange }: ToggleProps) {
     <div className="ctrl-row">
       <label className="ctrl-label">{label}</label>
       <button
+        role="switch"
+        aria-checked={checked}
+        aria-label={label}
         className={`toggle-btn ${checked ? 'on' : ''}`}
         onClick={() => onChange(!checked)}
       >

@@ -86,8 +86,8 @@ export function ResizeSection({ settings, onChange, imgW, imgH }: ResizeSectionP
               {s.mode === 'pixels' && (
                 <div className="dim-row">
                   <div className="dim-field">
-                    <label>W</label>
-                    <NumberInput value={s.width} placeholder={imgW || 'W'} min={1} max={8000} onChange={handleWidthChange} />
+                    <label htmlFor="resize-width">W</label>
+                    <NumberInput id="resize-width" aria-label="W" value={s.width} placeholder={imgW || 'W'} min={1} max={8000} onChange={handleWidthChange} />
                   </div>
                   <button
                     className={`lock-btn ${s.lockAspect ? 'locked' : ''}`}
@@ -107,8 +107,8 @@ export function ResizeSection({ settings, onChange, imgW, imgH }: ResizeSectionP
                     )}
                   </button>
                   <div className="dim-field">
-                    <label>H</label>
-                    <NumberInput value={s.height} placeholder={imgH || 'H'} min={1} max={8000} onChange={handleHeightChange} />
+                    <label htmlFor="resize-height">H</label>
+                    <NumberInput id="resize-height" aria-label="H" value={s.height} placeholder={imgH || 'H'} min={1} max={8000} onChange={handleHeightChange} />
                   </div>
                 </div>
               )}
