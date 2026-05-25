@@ -274,6 +274,21 @@ export default function App() {
             className="flex-1 min-h-0 flex items-center justify-center overflow-hidden"
           >
             <div style={{ position: 'relative', width: frameW, height: frameH, flexShrink: 0 }}>
+              {/* Image sits behind the crop overlay */}
+              <img
+                src={selectedImage.src}
+                alt=""
+                draggable={false}
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'fill',
+                  display: 'block',
+                  userSelect: 'none',
+                }}
+              />
               <CropOverlay
                 imgW={selectedImage.width}
                 imgH={selectedImage.height}
