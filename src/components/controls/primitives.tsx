@@ -321,6 +321,51 @@ export function ControlStyles() {
       .preset-btn.active { border-color: var(--accent); background: var(--accent-dim); }
       .preset-name { font-size: 11px; font-weight: 500; }
       .preset-dim { font-size: 9px; font-family: 'DM Mono', monospace; color: var(--text3); }
+
+      .action-btn {
+        padding: 4px 10px;
+        border-radius: 5px;
+        border: 1px solid var(--border);
+        background: var(--bg3);
+        color: var(--text2);
+        font-family: 'DM Sans', sans-serif;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.1s;
+        white-space: nowrap;
+      }
+      .action-btn:hover { border-color: var(--border2); color: var(--text); background: var(--bg); }
+      .action-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+      .action-btn.full-width { width: 100%; text-align: center; }
+
+      .btn-group { display: flex; gap: 4px; flex: 1; }
+
+      .ctrl-hint { font-size: 10px; color: var(--text3); font-family: 'DM Mono', monospace; }
+
+      .sub-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+        background: var(--bg3);
+        border-radius: 6px;
+        border: 1px solid var(--border);
+      }
+
+      .color-input {
+        width: 32px; height: 26px;
+        border-radius: 5px;
+        border: 1px solid var(--border);
+        background: transparent;
+        cursor: pointer;
+        padding: 2px;
+      }
+
+      .select-input {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 11px;
+        cursor: pointer;
+      }
     `}</style>
   )
 }
