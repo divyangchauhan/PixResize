@@ -12,17 +12,33 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
   const [showBeforeAfter, setShowBeforeAfter] = useState(false)
   const [sliderX, setSliderX] = useState(50)
   const [dragging, setDragging] = useState(false)
-  const [processedSrc, setProcessedSrc] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Single display canvas — we blit the off-screen processedCanvas into it
+  // directly rather than going through toDataURL() → <img>, which would
+  // re-encode and lose quality (especially for JPEG output).
+  const displayCanvasRef = useRef<HTMLCanvasElement>(null)
+
   useEffect(() => {
+    const display = displayCanvasRef.current
+    if (!display) return
+
     if (!processedCanvas) {
-      setProcessedSrc(null)
+      // Clear the canvas when there is nothing to show
+      const ctx = display.getContext('2d')
+      if (ctx) ctx.clearRect(0, 0, display.width, display.height)
+      display.width = 0
+      display.height = 0
       return
     }
-    setProcessedSrc(processedCanvas.toDataURL())
+
+    display.width = processedCanvas.width
+    display.height = processedCanvas.height
+    const ctx = display.getContext('2d')
+    if (ctx) ctx.drawImage(processedCanvas, 0, 0)
   }, [processedCanvas])
 
+  // ── Before/After drag ────────────────────────────────────────────────────
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!dragging || !containerRef.current) return
@@ -45,6 +61,7 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
     }
   }, [dragging, handleMouseMove, handleMouseUp])
 
+  // ── Empty state ───────────────────────────────────────────────────────────
   if (!image) {
     return (
       <div className="preview-empty">
@@ -73,7 +90,10 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
     )
   }
 
-  const displaySrc = processedSrc ?? image.src
+  // The "after" view — canvas if processing has completed, original img otherwise
+  const afterElement = processedCanvas
+    ? <canvas ref={displayCanvasRef} className="preview-img" aria-label="Processed image" />
+    : <img src={image.src} alt="preview" className="preview-img" />
 
   return (
     <div className="preview-panel">
@@ -121,6 +141,7 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
             className="ba-container"
             style={{ position: 'relative', width: '100%', height: '100%' }}
           >
+            {/* After (processed) — sits underneath, full width */}
             <div
               className="ba-after"
               style={{
@@ -131,9 +152,11 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
                 justifyContent: 'center',
               }}
             >
-              <img src={displaySrc} alt="after" className="preview-img" />
+              {afterElement}
               <span className="ba-label ba-label-after">After</span>
             </div>
+
+            {/* Before (original) — clipped to the left of the slider */}
             <div
               className="ba-before"
               style={{
@@ -148,6 +171,8 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
               <img src={image.src} alt="before" className="preview-img" />
               <span className="ba-label ba-label-before">Before</span>
             </div>
+
+            {/* Drag handle */}
             <div
               className="ba-slider"
               style={{ left: `${sliderX}%` }}
@@ -172,7 +197,7 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
               justifyContent: 'center',
             }}
           >
-            <img src={displaySrc} alt="preview" className="preview-img" />
+            {afterElement}
           </div>
         )}
       </div>
