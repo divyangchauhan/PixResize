@@ -136,6 +136,7 @@ export function ImageList({ images, selectedId, onSelect, onRemove, onAdd }: Ima
         .thumb-grid {
           display: grid;
           grid-template-columns: 1fr 1fr;
+          align-content: start;
           gap: 6px;
           padding: 8px;
           overflow-y: auto;
