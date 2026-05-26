@@ -222,6 +222,29 @@ export default function App() {
     setCropActive(false)
   }, [selectedImage, updateSettings])
 
+  // Copy the selected image's settings to every other image in the batch.
+  // Each target gets its own deep-clone so state is never shared.
+  const applyToAll = useCallback(() => {
+    if (!selectedImage || images.length < 2) return
+    const settingsCopy = JSON.parse(JSON.stringify(selectedImage.settings)) as Settings
+    setImages((prev) =>
+      prev.map((img) => {
+        if (img.id === selectedImage.id) return img
+        // Push a new history entry for each affected image
+        const hist = historyRef.current[img.id]
+        if (hist) {
+          const truncated = hist.stack.slice(0, hist.idx + 1)
+          truncated.push(JSON.parse(JSON.stringify(settingsCopy)))
+          if (truncated.length > MAX_HISTORY) truncated.shift()
+          hist.stack = truncated
+          hist.idx = truncated.length - 1
+        }
+        return { ...img, settings: JSON.parse(JSON.stringify(settingsCopy)) }
+      }),
+    )
+    forceUpdate((n) => n + 1)
+  }, [selectedImage, images])
+
   const hist = selectedImage ? historyRef.current[selectedImage.id] : null
   const canUndo = !!hist && hist.idx > 0
   const canRedo = !!hist && hist.idx < hist.stack.length - 1
@@ -349,6 +372,7 @@ export default function App() {
       onUndo={undo}
       onRedo={redo}
       onReset={reset}
+      onApplyToAll={applyToAll}
     />
   )
 

@@ -171,4 +171,49 @@ test.describe('Preview panel', () => {
     await baBtn.click()
     await expect(baBtn).toHaveClass(/active/)
   })
+
+  test('preview renders a <canvas> element after processing', async ({ page }) => {
+    await uploadImage(page)
+    // Wait for the processing overlay to disappear (canvas is drawn)
+    await expect(page.locator('.processing-overlay')).not.toBeVisible({ timeout: 5000 })
+    // A <canvas> should be present in the preview area
+    await expect(page.locator('.preview-canvas-wrap canvas')).toBeVisible()
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Apply to All
+// ---------------------------------------------------------------------------
+
+test.describe('Apply to All', () => {
+  test('Apply to All button is disabled with a single image', async ({ page }) => {
+    await uploadImage(page)
+    await expect(page.getByTitle('Apply current settings to all images')).toBeDisabled()
+  })
+
+  test('Apply to All is enabled after a second image is uploaded', async ({ page }) => {
+    await uploadImage(page)
+    // Upload a second image via the add-more input in ImageList
+    await page.locator('input[type="file"]').last().setInputFiles(getFixturePath())
+    await expect(page.getByTitle('Apply current settings to all images')).not.toBeDisabled({ timeout: 5000 })
+  })
+
+  test('Apply to All propagates settings to all images', async ({ page }) => {
+    await uploadImage(page)
+    // Add second image
+    await page.locator('input[type="file"]').last().setInputFiles(getFixturePath())
+    await expect(page.getByTitle('Apply current settings to all images')).not.toBeDisabled({ timeout: 5000 })
+
+    // Change a setting on the first image: switch format to PNG
+    await page.getByRole('button', { name: 'PNG' }).click()
+
+    // Apply to all
+    await page.getByTitle('Apply current settings to all images').click()
+
+    // Switch to second image and verify format was applied
+    const thumbnails = page.locator('.img-thumb')
+    await thumbnails.nth(1).click()
+    // PNG button should be active for the second image too
+    await expect(page.getByRole('button', { name: 'PNG' }).first()).toHaveClass(/active/)
+  })
 })

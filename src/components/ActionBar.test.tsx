@@ -36,6 +36,7 @@ const defaultProps = {
   onUndo: vi.fn(),
   onRedo: vi.fn(),
   onReset: vi.fn(),
+  onApplyToAll: vi.fn(),
 }
 
 describe('ActionBar', () => {
@@ -124,5 +125,36 @@ describe('ActionBar', () => {
     const images = [makeImage(), makeImage({ id: 'img-2' })]
     render(<ActionBar {...defaultProps} images={images} />)
     expect(screen.getByText(/ZIP \(2\)/)).toBeInTheDocument()
+  })
+
+  // ── Apply to All ──────────────────────────────────────────────────────────
+  it('renders Apply to All button', () => {
+    render(<ActionBar {...defaultProps} />)
+    expect(screen.getByTitle('Apply current settings to all images')).toBeInTheDocument()
+  })
+
+  it('Apply to All is disabled with only one image', () => {
+    render(<ActionBar {...defaultProps} images={[makeImage()]} />)
+    expect(screen.getByTitle('Apply current settings to all images')).toBeDisabled()
+  })
+
+  it('Apply to All is enabled when multiple images are loaded', () => {
+    const images = [makeImage(), makeImage({ id: 'img-2' })]
+    render(<ActionBar {...defaultProps} images={images} />)
+    expect(screen.getByTitle('Apply current settings to all images')).not.toBeDisabled()
+  })
+
+  it('calls onApplyToAll when Apply to All is clicked', () => {
+    const onApplyToAll = vi.fn()
+    const images = [makeImage(), makeImage({ id: 'img-2' })]
+    render(<ActionBar {...defaultProps} images={images} onApplyToAll={onApplyToAll} />)
+    fireEvent.click(screen.getByTitle('Apply current settings to all images'))
+    expect(onApplyToAll).toHaveBeenCalledOnce()
+  })
+
+  it('Apply to All is disabled when no image is selected', () => {
+    const images = [makeImage(), makeImage({ id: 'img-2' })]
+    render(<ActionBar {...defaultProps} image={null} images={images} />)
+    expect(screen.getByTitle('Apply current settings to all images')).toBeDisabled()
   })
 })

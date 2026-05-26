@@ -11,6 +11,7 @@ interface Props {
   onUndo: () => void
   onRedo: () => void
   onReset: () => void
+  onApplyToAll: () => void
 }
 
 function getFilename(img: ImageItem, index: number, settings: Settings): string {
@@ -25,7 +26,7 @@ function getFilename(img: ImageItem, index: number, settings: Settings): string 
   )
 }
 
-export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onReset }: Props) {
+export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onReset, onApplyToAll }: Props) {
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
   const [base64Modal, setBase64Modal] = useState(false)
@@ -178,6 +179,14 @@ export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onR
           </button>
           <button className="action-btn-sm" onClick={onReset} title="Reset to defaults">
             Reset
+          </button>
+          <button
+            className="action-btn-sm"
+            onClick={onApplyToAll}
+            disabled={!image || images.length < 2}
+            title="Apply current settings to all images"
+          >
+            Apply to All
           </button>
         </div>
 
