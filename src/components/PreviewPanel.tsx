@@ -38,28 +38,44 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
     if (ctx) ctx.drawImage(processedCanvas, 0, 0)
   }, [processedCanvas])
 
-  // ── Before/After drag ────────────────────────────────────────────────────
-  const handleMouseMove = useCallback(
-    (e: MouseEvent) => {
-      if (!dragging || !containerRef.current) return
+  // ── Before/After drag (mouse + touch) ────────────────────────────────────
+  const updateSlider = useCallback(
+    (clientX: number) => {
+      if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
-      const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+      const pct = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100))
       setSliderX(pct)
     },
-    [dragging],
+    [],
   )
 
-  const handleMouseUp = useCallback(() => setDragging(false), [])
+  const handleMouseMove = useCallback(
+    (e: MouseEvent) => { if (dragging) updateSlider(e.clientX) },
+    [dragging, updateSlider],
+  )
+
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => { if (dragging) { e.preventDefault(); updateSlider(e.touches[0].clientX) } },
+    [dragging, updateSlider],
+  )
+
+  const stopDrag = useCallback(() => setDragging(false), [])
 
   useEffect(() => {
     if (!dragging) return
     window.addEventListener('mousemove', handleMouseMove)
-    window.addEventListener('mouseup', handleMouseUp)
+    window.addEventListener('mouseup', stopDrag)
+    window.addEventListener('touchmove', handleTouchMove, { passive: false })
+    window.addEventListener('touchend', stopDrag)
+    window.addEventListener('touchcancel', stopDrag)
     return () => {
       window.removeEventListener('mousemove', handleMouseMove)
-      window.removeEventListener('mouseup', handleMouseUp)
+      window.removeEventListener('mouseup', stopDrag)
+      window.removeEventListener('touchmove', handleTouchMove)
+      window.removeEventListener('touchend', stopDrag)
+      window.removeEventListener('touchcancel', stopDrag)
     }
-  }, [dragging, handleMouseMove, handleMouseUp])
+  }, [dragging, handleMouseMove, handleTouchMove, stopDrag])
 
   // ── Empty state ───────────────────────────────────────────────────────────
   if (!image) {
@@ -177,6 +193,7 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
               className="ba-slider"
               style={{ left: `${sliderX}%` }}
               onMouseDown={() => setDragging(true)}
+              onTouchStart={(e) => { e.preventDefault(); setDragging(true) }}
             >
               <div className="ba-slider-line" />
               <div className="ba-slider-handle">
@@ -298,7 +315,7 @@ export function PreviewPanel({ image, processedCanvas, processing }: Props) {
           animation: spin 0.7s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .ba-container { user-select: none; }
+        .ba-container { user-select: none; touch-action: none; }
         .ba-label {
           position: absolute;
           top: 10px;

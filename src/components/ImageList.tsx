@@ -11,50 +11,7 @@ interface ImageThumbProps {
 function ImageThumb({ item, selected, onClick, onRemove }: ImageThumbProps) {
   const name = item.name.length > 14 ? item.name.slice(0, 12) + '…' : item.name
   return (
-    <>
-      <style>{`
-        .img-thumb {
-          position: relative;
-          aspect-ratio: 1;
-          border-radius: 6px;
-          overflow: hidden;
-          border: 1.5px solid var(--border);
-          cursor: pointer;
-          transition: border-color 0.1s;
-          background: var(--bg3);
-        }
-        .img-thumb:hover { border-color: var(--border2); }
-        .img-thumb.selected { border-color: var(--accent); }
-        .img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .img-thumb-overlay {
-          position: absolute;
-          bottom: 0; left: 0; right: 0;
-          background: linear-gradient(transparent, rgba(0,0,0,0.7));
-          padding: 4px 5px 4px;
-          display: flex; align-items: center; justify-content: space-between;
-        }
-        .img-thumb-name { font-size: 9px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .img-thumb-badge { font-size: 9px; color: var(--success); font-weight: 600; }
-        .img-thumb-remove {
-          position: absolute;
-          top: 3px; right: 3px;
-          width: 16px; height: 16px;
-          border-radius: 50%;
-          background: rgba(0,0,0,0.6);
-          border: none;
-          color: #fff;
-          font-size: 11px;
-          line-height: 1;
-          cursor: pointer;
-          display: none;
-          align-items: center;
-          justify-content: center;
-          transition: background 0.1s;
-        }
-        .img-thumb:hover .img-thumb-remove { display: flex; }
-        .img-thumb-remove:hover { background: var(--danger); }
-      `}</style>
-      <div className={`img-thumb${selected ? ' selected' : ''}`} onClick={onClick}>
+    <div className={`img-thumb${selected ? ' selected' : ''}`} onClick={onClick}>
         <img src={item.src} alt={item.name} />
         <div className="img-thumb-overlay">
           <span className="img-thumb-name">{name}</span>
@@ -68,7 +25,6 @@ function ImageThumb({ item, selected, onClick, onRemove }: ImageThumbProps) {
           ×
         </button>
       </div>
-    </>
   )
 }
 
@@ -144,6 +100,46 @@ export function ImageList({ images, selectedId, onSelect, onRemove, onAdd }: Ima
         }
         .thumb-grid::-webkit-scrollbar { width: 3px; }
         .thumb-grid::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+        .img-thumb {
+          position: relative;
+          aspect-ratio: 1;
+          border-radius: 6px;
+          overflow: hidden;
+          border: 1.5px solid var(--border);
+          cursor: pointer;
+          transition: border-color 0.1s;
+          background: var(--bg3);
+        }
+        .img-thumb:hover { border-color: var(--border2); }
+        .img-thumb.selected { border-color: var(--accent); }
+        .img-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .img-thumb-overlay {
+          position: absolute;
+          bottom: 0; left: 0; right: 0;
+          background: linear-gradient(transparent, rgba(0,0,0,0.7));
+          padding: 4px 5px 4px;
+          display: flex; align-items: center; justify-content: space-between;
+        }
+        .img-thumb-name { font-size: 9px; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .img-thumb-badge { font-size: 9px; color: var(--success); font-weight: 600; }
+        .img-thumb-remove {
+          position: absolute;
+          top: 3px; right: 3px;
+          width: 16px; height: 16px;
+          border-radius: 50%;
+          background: rgba(0,0,0,0.6);
+          border: none;
+          color: #fff;
+          font-size: 11px;
+          line-height: 1;
+          cursor: pointer;
+          display: none;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.1s;
+        }
+        .img-thumb:hover .img-thumb-remove { display: flex; }
+        .img-thumb-remove:hover { background: var(--danger); }
       `}</style>
       <div className="image-list">
         <div className="panel-header">
