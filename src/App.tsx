@@ -245,6 +245,11 @@ export default function App() {
     forceUpdate((n) => n + 1)
   }, [selectedImage, images])
 
+  const markProcessed = useCallback((ids: string[]) => {
+    const set = new Set(ids)
+    setImages((prev) => prev.map((img) => (set.has(img.id) ? { ...img, processed: true } : img)))
+  }, [])
+
   const hist = selectedImage ? historyRef.current[selectedImage.id] : null
   const canUndo = !!hist && hist.idx > 0
   const canRedo = !!hist && hist.idx < hist.stack.length - 1
@@ -373,6 +378,7 @@ export default function App() {
       onRedo={redo}
       onReset={reset}
       onApplyToAll={applyToAll}
+      onMarkProcessed={markProcessed}
     />
   )
 

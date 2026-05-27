@@ -35,14 +35,14 @@ export function CropOverlay({ imgW, imgH, crop, onChange }: Props) {
   } | null>(null)
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => {
+    const applyDrag = (clientX: number, clientY: number) => {
       if (!dragRef.current || !containerRef.current) return
       const { handle, startX, startY, startCrop } = dragRef.current
       const cr = containerRef.current.getBoundingClientRect()
       const iw = imgWRef.current
       const ih = imgHRef.current
-      const rawDx = ((e.clientX - startX) / cr.width) * iw
-      const rawDy = ((e.clientY - startY) / cr.height) * ih
+      const rawDx = ((clientX - startX) / cr.width) * iw
+      const rawDy = ((clientY - startY) / cr.height) * ih
 
       let { x, y, w, h } = startCrop
       const right = x + w
@@ -78,13 +78,21 @@ export function CropOverlay({ imgW, imgH, crop, onChange }: Props) {
       })
     }
 
+    const onMove = (e: MouseEvent) => applyDrag(e.clientX, e.clientY)
+    const onTouchMove = (e: TouchEvent) => { e.preventDefault(); applyDrag(e.touches[0].clientX, e.touches[0].clientY) }
     const onUp = () => { dragRef.current = null }
 
     window.addEventListener('mousemove', onMove)
     window.addEventListener('mouseup', onUp)
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', onUp)
+    window.addEventListener('touchcancel', onUp)
     return () => {
       window.removeEventListener('mousemove', onMove)
       window.removeEventListener('mouseup', onUp)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onUp)
+      window.removeEventListener('touchcancel', onUp)
     }
   }, [])
 
@@ -99,6 +107,13 @@ export function CropOverlay({ imgW, imgH, crop, onChange }: Props) {
     e.preventDefault()
     e.stopPropagation()
     dragRef.current = { handle, startX: e.clientX, startY: e.clientY, startCrop: { ...c } }
+  }
+
+  const startDragTouch = (e: React.TouchEvent, handle: Handle) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const t = e.touches[0]
+    dragRef.current = { handle, startX: t.clientX, startY: t.clientY, startCrop: { ...c } }
   }
 
   const handles: { id: Handle; left: string; top: string; cursor: string }[] = [
@@ -117,7 +132,7 @@ export function CropOverlay({ imgW, imgH, crop, onChange }: Props) {
   return (
     <div
       ref={containerRef}
-      style={{ position: 'absolute', inset: 0, overflow: 'hidden', userSelect: 'none' }}
+      style={{ position: 'absolute', inset: 0, overflow: 'hidden', userSelect: 'none', touchAction: 'none' }}
     >
       {/* Dark mask outside selection */}
       <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: `${pctY}%`, background: mask }} />
@@ -138,6 +153,7 @@ export function CropOverlay({ imgW, imgH, crop, onChange }: Props) {
           boxSizing: 'border-box',
         }}
         onMouseDown={(e) => startDrag(e, 'move')}
+        onTouchStart={(e) => startDragTouch(e, 'move')}
       />
 
       {/* 8 resize handles */}
@@ -158,6 +174,7 @@ export function CropOverlay({ imgW, imgH, crop, onChange }: Props) {
             zIndex: 1,
           }}
           onMouseDown={(e) => startDrag(e, id)}
+          onTouchStart={(e) => startDragTouch(e, id)}
         />
       ))}
 

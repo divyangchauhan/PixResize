@@ -12,6 +12,7 @@ interface Props {
   onRedo: () => void
   onReset: () => void
   onApplyToAll: () => void
+  onMarkProcessed: (ids: string[]) => void
 }
 
 function getFilename(img: ImageItem, index: number, settings: Settings): string {
@@ -26,7 +27,7 @@ function getFilename(img: ImageItem, index: number, settings: Settings): string 
   )
 }
 
-export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onReset, onApplyToAll }: Props) {
+export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onReset, onApplyToAll, onMarkProcessed }: Props) {
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
   const [base64Modal, setBase64Modal] = useState(false)
@@ -47,6 +48,7 @@ export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onR
       a.download = getFilename(image, 0, image.settings)
       a.click()
       URL.revokeObjectURL(url)
+      onMarkProcessed([image.id])
     } finally {
       setBusy(false)
     }
@@ -57,6 +59,7 @@ export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onR
     setBusy(true)
     try {
       const files: Record<string, Uint8Array> = {}
+      const exported: string[] = []
       for (let i = 0; i < images.length; i++) {
         const img = images[i]
         const canvas = await processImage(img.src, img.settings)
@@ -64,6 +67,7 @@ export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onR
         if (!blob) continue
         const ab = await blob.arrayBuffer()
         files[getFilename(img, i, img.settings)] = new Uint8Array(ab)
+        exported.push(img.id)
       }
       const zipped = zipSync(files, { level: 1 })
       const zipBlob = new Blob([zipped], { type: 'application/zip' })
@@ -73,6 +77,7 @@ export function ActionBar({ image, images, canUndo, canRedo, onUndo, onRedo, onR
       a.download = 'pixresize_export.zip'
       a.click()
       URL.revokeObjectURL(url)
+      onMarkProcessed(exported)
     } finally {
       setBusy(false)
     }
