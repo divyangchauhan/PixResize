@@ -37,6 +37,7 @@ const defaultProps = {
   onRedo: vi.fn(),
   onReset: vi.fn(),
   onApplyToAll: vi.fn(),
+  onMarkProcessed: vi.fn(),
 }
 
 describe('ActionBar', () => {
