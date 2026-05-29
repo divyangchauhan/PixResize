@@ -217,3 +217,115 @@ test.describe('Apply to All', () => {
     await expect(page.getByRole('button', { name: 'PNG' }).first()).toHaveClass(/active/)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Transform section
+// ---------------------------------------------------------------------------
+
+test.describe('Transform section', () => {
+  test('opens and shows Rotate and Flip controls', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /transform/i }).click()
+    await expect(page.getByText('Rotate')).toBeVisible()
+    await expect(page.getByText('Flip')).toBeVisible()
+    await expect(page.getByRole('switch', { name: /crop/i })).toBeVisible()
+  })
+
+  test('rotate CW button is clickable', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /transform/i }).click()
+    // exact: true prevents matching 'CCW' which also contains 'CW'
+    await page.getByRole('button', { name: 'CW', exact: true }).click()
+    // Rotation hint appears after one CW click (0 → 90°)
+    await expect(page.getByText('Rotation: 90°')).toBeVisible()
+  })
+
+  test('rotate CCW button is clickable', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /transform/i }).click()
+    await page.getByRole('button', { name: 'CCW' }).click()
+    await expect(page.getByText('Rotation: 270°')).toBeVisible()
+  })
+
+  test('rotate 180° button is clickable', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /transform/i }).click()
+    await page.getByRole('button', { name: '180°' }).click()
+    await expect(page.getByText('Rotation: 180°')).toBeVisible()
+  })
+
+  test('flip Horizontal button toggles active state', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /transform/i }).click()
+    const flipH = page.getByRole('button', { name: 'Horizontal' })
+    await flipH.click()
+    await expect(flipH).toHaveClass(/active/)
+    // clicking again removes active
+    await flipH.click()
+    await expect(flipH).not.toHaveClass(/active/)
+  })
+
+  test('flip Vertical button toggles active state', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /transform/i }).click()
+    const flipV = page.getByRole('button', { name: 'Vertical' })
+    await flipV.click()
+    await expect(flipV).toHaveClass(/active/)
+  })
+
+  test('crop toggle enables CropOverlay on the preview', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /transform/i }).click()
+    await page.getByRole('switch', { name: /crop/i }).click()
+    // CropOverlay renders a dimension tooltip ("W × H") anywhere on the page
+    // when crop mode is active (not inside .preview-canvas-wrap which is unmounted)
+    await expect(page.locator('text=/\\d+ × \\d+/')).toBeVisible({ timeout: 5000 })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Watermark section
+// ---------------------------------------------------------------------------
+
+test.describe('Watermark section', () => {
+  test('opens and shows text and logo watermark toggles', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /watermark/i }).click()
+    await expect(page.getByRole('switch', { name: /text watermark/i })).toBeVisible()
+    await expect(page.getByRole('switch', { name: /logo watermark/i })).toBeVisible()
+  })
+
+  test('enabling text watermark reveals text input and sliders', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /watermark/i }).click()
+    await page.getByRole('switch', { name: /text watermark/i }).click()
+    const wmSection = page.locator('.ctrl-section').filter({ hasText: 'Watermark' })
+    await expect(page.getByPlaceholder('Watermark text…')).toBeVisible()
+    // Use exact:true and scope to the Watermark section to avoid matching 'Resize'
+    await expect(wmSection.getByText('Size', { exact: true })).toBeVisible()
+    await expect(wmSection.getByText('Opacity', { exact: true })).toBeVisible()
+  })
+
+  test('can type watermark text', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /watermark/i }).click()
+    await page.getByRole('switch', { name: /text watermark/i }).click()
+    await page.getByPlaceholder('Watermark text…').fill('© 2025')
+    await expect(page.getByPlaceholder('Watermark text…')).toHaveValue('© 2025')
+  })
+
+  test('text position dropdown lists all positions', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /watermark/i }).click()
+    await page.getByRole('switch', { name: /text watermark/i }).click()
+    const select = page.locator('.ctrl-section').filter({ hasText: 'Watermark' }).locator('select').first()
+    await expect(select.locator('option')).toHaveCount(7)
+  })
+
+  test('enabling logo watermark shows upload button', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByRole('button', { name: /watermark/i }).click()
+    await page.getByRole('switch', { name: /logo watermark/i }).click()
+    await expect(page.getByText('+ Upload logo image')).toBeVisible()
+  })
+})
