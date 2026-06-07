@@ -1,5 +1,8 @@
 # PixResize
 
+[![Live Demo](https://img.shields.io/badge/demo-pixresize.vercel.app-blue?style=flat-square)](https://pixresize.vercel.app)
+[![Deploy](https://img.shields.io/github/actions/workflow/status/divyangchauhan/PixResize/deploy.yml?style=flat-square&label=deploy)](https://github.com/divyangchauhan/PixResize/actions/workflows/deploy.yml)
+
 A client-side image editor for resizing, transforming, and exporting up to 20 images at once — nothing leaves the browser.
 
 ## What it does
