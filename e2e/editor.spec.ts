@@ -329,3 +329,80 @@ test.describe('Watermark section', () => {
     await expect(page.getByText('+ Upload logo image')).toBeVisible()
   })
 })
+
+// ---------------------------------------------------------------------------
+// Base64 export modal
+// ---------------------------------------------------------------------------
+
+test.describe('Base64 export modal', () => {
+  test('Base64 button opens the modal with a textarea', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByTitle('Export as Base64').click()
+    await expect(page.locator('.modal-overlay')).toBeVisible({ timeout: 8000 })
+    await expect(page.locator('textarea.base64-area')).toBeVisible()
+    await expect(page.getByText('Base64 Export')).toBeVisible()
+  })
+
+  test('modal shows Copy to clipboard button', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByTitle('Export as Base64').click()
+    await expect(page.locator('.modal-overlay')).toBeVisible({ timeout: 8000 })
+    await expect(page.getByRole('button', { name: /copy to clipboard/i })).toBeVisible()
+  })
+
+  test('close button dismisses the modal', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByTitle('Export as Base64').click()
+    await expect(page.locator('.modal-overlay')).toBeVisible({ timeout: 8000 })
+    await page.locator('.modal-close').click()
+    await expect(page.locator('.modal-overlay')).not.toBeVisible()
+  })
+
+  test('clicking overlay backdrop dismisses the modal', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByTitle('Export as Base64').click()
+    await expect(page.locator('.modal-overlay')).toBeVisible({ timeout: 8000 })
+    // Click the overlay outside the modal dialog
+    await page.locator('.modal-overlay').click({ position: { x: 10, y: 10 } })
+    await expect(page.locator('.modal-overlay')).not.toBeVisible()
+  })
+
+  test('textarea contains a data URL after opening', async ({ page }) => {
+    await uploadImage(page)
+    await page.getByTitle('Export as Base64').click()
+    await expect(page.locator('.modal-overlay')).toBeVisible({ timeout: 8000 })
+    const value = await page.locator('textarea.base64-area').inputValue()
+    expect(value).toMatch(/^data:image\//)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// ZIP download
+// ---------------------------------------------------------------------------
+
+test.describe('ZIP download', () => {
+  test('ZIP button is enabled when images are loaded', async ({ page }) => {
+    await uploadImage(page)
+    await expect(page.getByTitle('Bulk download as ZIP')).not.toBeDisabled()
+  })
+
+  test('ZIP button label reflects image count', async ({ page }) => {
+    await uploadImage(page)
+    await expect(page.getByTitle('Bulk download as ZIP')).toContainText('ZIP (1)')
+  })
+
+  test('ZIP download starts when button is clicked', async ({ page }) => {
+    await uploadImage(page)
+    const [download] = await Promise.all([
+      page.waitForEvent('download', { timeout: 15000 }),
+      page.getByTitle('Bulk download as ZIP').click(),
+    ])
+    expect(download.suggestedFilename()).toBe('pixresize_export.zip')
+  })
+
+  test('ZIP button count increases with multiple images', async ({ page }) => {
+    await uploadImage(page)
+    await page.locator('input[type="file"]').last().setInputFiles(getFixturePath())
+    await expect(page.getByTitle('Bulk download as ZIP')).toContainText('ZIP (2)', { timeout: 5000 })
+  })
+})
